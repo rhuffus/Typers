@@ -9,6 +9,7 @@ Typers es un fork experimental de TypeScript para explorar resultados y valores 
 ## Documentación
 
 - [Índice y guía de lectura](docs/typers/README.md).
+- [Construir y probar el prototipo](docs/typers/getting-started.md).
 - [Visión y alcance](docs/typers/vision.md).
 - [Funcionalidades y complejidad](docs/typers/features.md).
 - [Diseño del lenguaje](docs/typers/language.md).
@@ -26,7 +27,7 @@ Typers es un fork experimental de TypeScript para explorar resultados y valores 
 | Compilador nativo Go | [`tsc/`](tsc/) |
 | Infraestructura heredada del compilador JS | `src/`, `tests/` y scripts de raíz |
 
-Todavía no hay una versión pública de Typers. El primer hito crea un paquete local y comprueba un consumidor NestJS, distinguiendo compatibilidad del ejecutable y compatibilidad de la API del compilador.
+Todavía no hay una versión pública de Typers. El primer incremento ofrece un paquete local del compilador, runtime Result/Option y sintaxis if-let experimental. Distingue compatibilidad del ejecutable y compatibilidad de la API del compilador. Consulta el registro de estado para las pruebas efectivamente realizadas.
 
 ## Contribución y licencia
 

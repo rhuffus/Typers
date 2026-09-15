@@ -8,6 +8,7 @@ Esta base registra la conversación de diseño y las decisiones iniciales. Permi
 | --- | --- |
 | [Visión](vision.md) | Motivación, usuarios, objetivos y límites |
 | [Estado](status.md) | Implementación y resultados verificados |
+| [Primeros pasos](getting-started.md) | Construcción y ejecución del prototipo local |
 | [Decisiones](decisions/README.md) | Acuerdos y preguntas abiertas |
 | [Funcionalidades](features.md) | Catálogo, complejidad y dependencias |
 | [Lenguaje](language.md) | Semántica y ejemplos |

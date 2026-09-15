@@ -1,0 +1,24 @@
+{
+  "name": "typers-nestjs-example",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=24" },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "build:typers": "tsc -p tsconfig.typers.json",
+    "start": "node dist/main.js"
+  },
+  "dependencies": {
+    "@nestjs/common": "12.0.3",
+    "@nestjs/core": "12.0.3",
+    "@nestjs/platform-express": "12.0.3",
+    "@typers/core": "file:../../built/typers/typers-core-0.1.0-alpha.0.tgz",
+    "reflect-metadata": "0.2.2",
+    "rxjs": "7.8.2"
+  },
+  "devDependencies": {
+    "@types/node": "24.13.4",
+    "typescript": "file:../../built/typers/typers-compiler-7.0.2-typers.0.tgz"
+  }
+}

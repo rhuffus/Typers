@@ -9,6 +9,7 @@ type SourceFileParseOptions struct {
 	FileName                       string
 	Path                           tspath.Path
 	ExternalModuleIndicatorOptions ExternalModuleIndicatorOptions
+	ExperimentalTypersSyntax       bool
 }
 
 type ExternalModuleIndicatorOptions struct {

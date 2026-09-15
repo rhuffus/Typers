@@ -274,6 +274,8 @@ func parseCompilerOptions(key string, value any, allOptions *core.CompilerOption
 		allOptions.ExplainFiles = ParseTristate(value)
 	case "experimentalDecorators":
 		allOptions.ExperimentalDecorators = ParseTristate(value)
+	case "experimentalTypersSyntax":
+		allOptions.ExperimentalTypersSyntax = ParseTristate(value)
 	case "forceConsistentCasingInFileNames":
 		allOptions.ForceConsistentCasingInFileNames = ParseTristate(value)
 	case "generateCpuProfile":

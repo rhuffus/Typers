@@ -8,6 +8,8 @@ import type { ScriptTarget } from "#enums/scriptTarget";
 // Keep in sync with compileroptions.go, obviously
 
 export interface CompilerOptions {
+    /** Enables the experimental Typers if-let syntax. */
+    experimentalTypersSyntax?: boolean;
     allowJs?: boolean;
     allowArbitraryExtensions?: boolean;
     allowImportingTsExtensions?: boolean;

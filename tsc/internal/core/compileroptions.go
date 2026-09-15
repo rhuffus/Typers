@@ -43,6 +43,7 @@ type CompilerOptions struct {
 	ErasableSyntaxOnly                        Tristate                                  `json:"erasableSyntaxOnly,omitzero"`
 	ExactOptionalPropertyTypes                Tristate                                  `json:"exactOptionalPropertyTypes,omitzero"`
 	ExperimentalDecorators                    Tristate                                  `json:"experimentalDecorators,omitzero"`
+	ExperimentalTypersSyntax                  Tristate                                  `json:"experimentalTypersSyntax,omitzero"`
 	ForceConsistentCasingInFileNames          Tristate                                  `json:"forceConsistentCasingInFileNames,omitzero"`
 	IsolatedModules                           Tristate                                  `json:"isolatedModules,omitzero"`
 	IsolatedDeclarations                      Tristate                                  `json:"isolatedDeclarations,omitzero"`

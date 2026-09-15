@@ -1,5 +1,7 @@
 # Arquitectura de Typers
 
+El diseño inicial se conserva como contexto. [ADR 0004](decisions/0004-experimental-runtime-and-if-let.md) concreta el runtime, la activación y el AST normalizado del primer prototipo; [estado](status.md) y [primeros pasos](getting-started.md) identifican la implementación efectiva. Las alternativas restantes no se consideran implementadas por aparecer aquí.
+
 [Índice de documentación](README.md) · [Compatibilidad](compatibility.md) · [Adaptadores](adapters.md) · [Desarrollo con agentes](ai-development.md)
 
 ## 1. Estado y alcance de este documento

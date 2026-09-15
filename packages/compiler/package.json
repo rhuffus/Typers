@@ -1,0 +1,17 @@
+{
+  "name": "@typers/compiler",
+  "version": "7.0.2-typers.0",
+  "private": true,
+  "description": "Experimental native Typers compiler based on TypeScript 7.0.2",
+  "license": "Apache-2.0",
+  "repository": "github:rhuffus/Typers",
+  "engines": { "node": ">=20.19" },
+  "bin": { "typers": "bin/typers.cjs", "tsc": "bin/typers.cjs" },
+  "main": "lib/version.cjs",
+  "types": "lib/version.d.cts",
+  "exports": {
+    ".": { "types": "./lib/version.d.cts", "default": "./lib/version.cjs" },
+    "./package.json": "./package.json"
+  },
+  "files": ["bin", "lib", "native", "build-info.json", "LICENSE.txt", "NOTICE.txt", "README.md"]
+}

@@ -71,6 +71,9 @@ func (m *Message) Localize(locale locale.Locale, args ...any) string {
 func Localize(locale locale.Locale, message *Message, key Key, args ...string) string {
 	if message == nil {
 		message = keyToMessage(key)
+		if message == nil {
+			message = typersMessageForKey(key)
+		}
 	}
 	if message == nil {
 		panic("Unknown diagnostic message: " + string(key))
