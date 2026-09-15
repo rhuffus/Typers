@@ -1,4 +1,7 @@
 /native/
+/dist/
+/vendor/
+/.api*.tsbuildinfo
 /build-info.json
 /LICENSE.txt
 /NOTICE.txt

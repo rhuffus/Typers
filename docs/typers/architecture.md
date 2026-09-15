@@ -2,6 +2,8 @@
 
 El diseño inicial se conserva como contexto. [ADR 0004](decisions/0004-experimental-runtime-and-if-let.md) concreta el runtime, la activación y el AST normalizado del primer prototipo; [estado](status.md) y [primeros pasos](getting-started.md) identifican la implementación efectiva. Las alternativas restantes no se consideran implementadas por aparecer aquí.
 
+[ADR 0005](decisions/0005-native-api-and-project-emission.md) añade la distribución de clientes sync/async y la emisión de proyectos en memoria desde el núcleo. El contrato actual y la brecha con Nest CLI se explican en [API nativa](native-api.md).
+
 [Índice de documentación](README.md) · [Compatibilidad](compatibility.md) · [Adaptadores](adapters.md) · [Desarrollo con agentes](ai-development.md)
 
 ## 1. Estado y alcance de este documento

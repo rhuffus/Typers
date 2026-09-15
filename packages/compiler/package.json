@@ -5,13 +5,30 @@
   "description": "Experimental native Typers compiler based on TypeScript 7.0.2",
   "license": "Apache-2.0",
   "repository": "github:rhuffus/Typers",
+  "type": "module",
   "engines": { "node": ">=20.19" },
   "bin": { "typers": "bin/typers.cjs", "tsc": "bin/typers.cjs" },
   "main": "lib/version.cjs",
   "types": "lib/version.d.cts",
   "exports": {
     ".": { "types": "./lib/version.d.cts", "default": "./lib/version.cjs" },
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./unstable/sync": { "types": "./dist/api/sync/api.d.ts", "default": "./dist/api/sync/api.js" },
+    "./unstable/async": { "types": "./dist/api/async/api.d.ts", "default": "./dist/api/async/api.js" },
+    "./unstable/fs": { "types": "./dist/api/fs.d.ts", "default": "./dist/api/fs.js" },
+    "./unstable/proto": { "types": "./dist/api/proto.d.ts", "default": "./dist/api/proto.js" },
+    "./unstable/ast": { "types": "./dist/ast/index.d.ts", "default": "./dist/ast/index.js" },
+    "./unstable/ast/is": { "types": "./dist/ast/is.d.ts", "default": "./dist/ast/is.js" },
+    "./unstable/ast/factory": { "types": "./dist/ast/factory.generated.d.ts", "default": "./dist/ast/factory.generated.js" },
+    "./unstable/ast/utils": { "types": "./dist/ast/utils.d.ts", "default": "./dist/ast/utils.js" },
+    "./unstable/ast/scanner": { "types": "./dist/ast/scanner.d.ts", "default": "./dist/ast/scanner.js" },
+    "./unstable/ast/visitor": { "types": "./dist/ast/visitor.d.ts", "default": "./dist/ast/visitor.js" },
+    "./unstable/ast/clone": { "types": "./dist/ast/clone.d.ts", "default": "./dist/ast/clone.js" }
   },
-  "files": ["bin", "lib", "native", "build-info.json", "LICENSE.txt", "NOTICE.txt", "README.md"]
+  "imports": {
+    "#getExePath": "./lib/getExePath.js",
+    "#enums/*": { "types": "./dist/enums/*.enum.d.ts", "default": "./dist/enums/*.js" },
+    "#vscode-jsonrpc/node": "./vendor/vscode-jsonrpc/lib/node/main.js"
+  },
+  "files": ["bin", "lib", "native", "dist", "vendor", "build-info.json", "LICENSE.txt", "NOTICE.txt", "README.md"]
 }

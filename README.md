@@ -4,7 +4,7 @@
 
 Typers es un fork experimental de TypeScript para explorar resultados y valores opcionales, patrones y propagación explícita de errores en proyectos TypeScript y NestJS, especialmente en zhenix-ai.
 
-**Estado:** fase inicial. La descripción expresa la dirección del proyecto; no significa que las extensiones estén implementadas ni que exista compatibilidad universal con herramientas TypeScript. Consulta la [hoja de ruta](docs/typers/roadmap.md) y el [registro de implementación](docs/typers/status.md).
+**Estado:** prototipo experimental con runtime Result/Option, if-let opt-in y API nativa con emisión de proyectos. La API clásica requerida por Nest CLI y la integración Oxc/editor siguen pendientes. Consulta la [hoja de ruta](docs/typers/roadmap.md) y el [registro de implementación](docs/typers/status.md) para el alcance comprobado.
 
 ## Documentación
 
@@ -14,6 +14,7 @@ Typers es un fork experimental de TypeScript para explorar resultados y valores 
 - [Funcionalidades y complejidad](docs/typers/features.md).
 - [Diseño del lenguaje](docs/typers/language.md).
 - [Arquitectura](docs/typers/architecture.md) y [compatibilidad](docs/typers/compatibility.md).
+- [API nativa y emisión programática](docs/typers/native-api.md).
 - [Hoja de ruta](docs/typers/roadmap.md), [validación](docs/typers/validation.md) y [decisiones](docs/typers/decisions/README.md).
 - [Desarrollo y mantenimiento](docs/typers/maintenance.md).
 
@@ -27,7 +28,7 @@ Typers es un fork experimental de TypeScript para explorar resultados y valores 
 | Compilador nativo Go | [`tsc/`](tsc/) |
 | Infraestructura heredada del compilador JS | `src/`, `tests/` y scripts de raíz |
 
-Todavía no hay una versión pública de Typers. El primer incremento ofrece un paquete local del compilador, runtime Result/Option y sintaxis if-let experimental. Distingue compatibilidad del ejecutable y compatibilidad de la API del compilador. Consulta el registro de estado para las pruebas efectivamente realizadas.
+Todavía no hay una versión pública de Typers. Los paquetes locales incluyen el compilador, su cliente API sync/async y el runtime. El ejemplo NestJS se construye mediante CLI y API; `nest build` aún requiere una adaptación. Consulta el registro de estado para las pruebas efectivamente realizadas.
 
 ## Contribución y licencia
 

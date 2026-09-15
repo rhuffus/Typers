@@ -1,17 +1,18 @@
 # Primer prototipo: construir y probar
 
-Esta guía corresponde al primer incremento experimental. Se construye desde el código del fork; no necesita una publicación npm de Typers. La API clásica de Nest CLI sigue fuera de la cobertura disponible.
+Esta guía corresponde al prototipo experimental de CLI, runtime, if-let y API nativa. Se construye desde el código del fork; no necesita una publicación npm de Typers. La API clásica de Nest CLI sigue fuera de la cobertura disponible.
 
 ## Requisitos y ubicación
 
 Ejecutar los comandos desde la raíz del repositorio. La prueba local se desarrolla con Node 24, npm 11 y Go 1.27. El empaquetador admite construir un artefacto para su host macOS/Linux/Windows en arm64/x64; eso no significa que todas las combinaciones hayan pasado una matriz de CI.
 
 ```sh
+npm --prefix tsc ci --ignore-scripts --no-audit --no-fund
 npm --prefix tooling ci --ignore-scripts --no-audit --no-fund
 node tooling/compatibility.mjs
 ```
 
-La prueba construye el compilador, ejecuta las pruebas del runtime, crea tarballs, prepara un consumidor aislado con dependencias externas fijadas, compila la aplicación y ejecuta HTTP 200/404. Registra por separado el fallo conocido de la API clásica.
+La prueba construye el compilador y su cliente de API nativa, ejecuta las pruebas del runtime, crea tarballs y prepara un consumidor aislado con dependencias externas fijadas. Comprueba las once subrutas de API, compila la aplicación mediante CLI y API y ejecuta HTTP 200/404. Registra por separado el fallo conocido de la API clásica.
 
 El consumidor generado se encuentra en `built/typers/consumer`. Se comprueba el contenido instalado para evitar que un tarball o una caché antigua produzcan un falso positivo. El informe queda en `built/typers/compatibility.json`; los artefactos generados no se guardan en Git.
 
@@ -26,6 +27,16 @@ node built/typers/consumer/dist/main.js
 La aplicación escucha por defecto en `127.0.0.1:3000`. `GET /users/1` devuelve Ada y `GET /users/missing` devuelve 404 con un error de dominio. `PORT` permite elegir otro puerto. El script de pruebas usa un puerto libre y cierra las aplicaciones al terminar.
 
 Las fuentes mantenidas están en `examples/nestjs/`. La variante estándar demuestra runtime y compatibilidad de emisión; `src/experimental.ts` demuestra if-let dentro de un servicio con inyección de dependencias. Ambas se prueban automáticamente.
+
+Para construir mediante la API desde el consumidor ya preparado:
+
+```sh
+cd built/typers/consumer
+npm run build:api
+npm run build:api:typers
+```
+
+Estos scripts invocan `project.typersEmitProject()` y guardan los resultados dentro de `outDir`. La operación de API captura los archivos en memoria; el script realiza las escrituras. No son `nest build` ni ejecutan sus plugins, assets o reescritura de aliases. Ver [API nativa](native-api.md).
 
 ## Usar las APIs
 
@@ -91,7 +102,7 @@ El corpus se fija al gitlink upstream. La dependencia de desarrollo TypeScript J
 ## Limitaciones actuales
 
 - `nest build` con el builder tsc de Nest CLI 12.0.1 requiere la API clásica y la sonda registra esa incompatibilidad.
-- El paquete CLI no incluye aún las rutas `unstable/*` de la API nativa upstream.
+- Las rutas `unstable/*` son experimentales. La emisión programática rechaza incremental, composite y referencias entre proyectos; esas operaciones siguen disponibles mediante el CLI según el soporte de la base.
 - Oxlint/Oxfmt, loaders y editores no adquieren soporte de if-let por instalar el paquete. Falta su adaptación y validación.
 - El AST normalizado no es una representación pública sin pérdida de la sintaxis original. Los mapas de fuentes tienen cobertura inicial, no una certificación completa del editor.
 - La comparación con upstream cubre fixtures concretos y la suite ejecutada; no es una garantía universal de todas las bibliotecas.

@@ -75,3 +75,48 @@ Nest CLI 12.0.1 carga correctamente nuestro paquete bajo `typescript`, pero lo r
 La aplicación consumidora utiliza Typers como único paquete compilador instalado bajo `typescript`. Las referencias oficiales de pruebas están en `tooling/` y en las dependencias de desarrollo upstream, fuera del consumidor. Eso no cambia la limitación de API.
 
 Siguiente trabajo: priorizar la estrategia de compatibilidad de API y el soporte del entorno Oxc/editor antes de recomendar la sintaxis experimental en todos los proyectos zhenix-ai. Las extensiones posteriores siguen el orden y las puertas de la [hoja de ruta](roadmap.md).
+
+El primer incremento se integró mediante [PR #2](https://github.com/rhuffus/Typers/pull/2), merge `bd9f5a85cd27629d2e00643ae2dc007045b7da90`. Su [CI en Linux](https://github.com/rhuffus/Typers/actions/runs/34961750907) terminó correctamente antes del merge.
+
+## 2026-09-15 — API nativa distribuida y emisión programática
+
+### Implementado
+
+- Once subrutas `unstable/*` en el paquete local, con clientes ESM sync/async y declaraciones; conservada la entrada raíz de versión.
+- Resolución del binario nativo dentro del propio paquete y build del cliente mediante Typers. Transporte vendorizado con su licencia, sin dependencias npm de ejecución adicionales.
+- `project.typersEmitProject()` y RPC Go homónimo: diagnósticos y emisión real de la vista seleccionada, capturando JS, `.d.ts` y mapas en memoria.
+- Respeto de noEmit/noEmitOnError/declaration-only; rechazo explícito de incremental, composite y referencias entre proyectos en esta operación.
+- Ejemplo NestJS con `build:api` y `build:api:typers`; comparación de archivos y prueba HTTP sobre ambas compilaciones programáticas.
+- Hashes ampliados a los árboles de código distribuidos del compilador, API y transporte; conservado el consumidor nuevo mediante npm ci y su lock externo.
+
+El contrato y sus límites están en [API nativa](native-api.md) y [ADR 0005](decisions/0005-native-api-and-project-emission.md). No se ha añadido otra sintaxis en esta entrega.
+
+### Verificación local completada
+
+Entorno: macOS arm64, Node 24.20.0, npm 11.19.0 y Go 1.27.1. Base TypeScript 7.0.2, NestJS 12.0.3 y Nest CLI 12.0.1.
+
+| Comprobación | Resultado |
+| --- | --- |
+| Suite nativa `go test ./...` | Correcta: 56 paquetes con tests y 43 sin tests, ningún fallo |
+| RPC enfocado `go test ./internal/api -run TestTypersEmitProject -count=1` | Correcto |
+| RPC con detección de carreras `go test -race ./internal/api -run TestTypersEmitProject -count=1` | Correcto |
+| Runtime Result/Option | 13/13 tests correctos, conservados |
+| Distribución instalada | Consumidor nuevo, 329 hashes comprobados, lock externo preservado |
+| Once subrutas de API | Importación correcta desde el alias instalado `typescript` |
+| Sync/async con binario predeterminado | Configuración, diagnósticos, AST, símbolos, tipos, printer y emisión correctos |
+| Declaraciones de la API | Consumidor `.mts` comprobado por el compilador nativo instalado |
+| Emisión en memoria | JS/declaraciones/mapas presentes; ninguna escritura de salida por la API |
+| Errores y modos excluidos | noEmit/noEmitOnError, diagnóstico TS2322, errores de configuración/sintaxis/globales/declaraciones y rechazos explícitos cubiertos |
+| Coherencia de vistas | Vistas antigua/nueva, vista liberada, cancelación y captura multifuente comprobadas |
+| NestJS estándar y con if-let mediante API | Mismos archivos y bytes que el CLI, DI/metadata/HTTP 200 y 404 correctos |
+| TS estándar contra upstream | Se mantiene la comparación de JS, declaraciones, mapas y diagnóstico TS2322 |
+
+Comando integrado: `node tooling/compatibility.mjs`. El informe actual sigue en `built/typers/compatibility.json` y los logs locales en `built/typers/native-api-compatibility.log` y `tsc/built/typers-native-api-tests.log`. Son resultados generados, no archivos versionados ni una garantía para cualquier proyecto.
+
+### Límites que siguen abiertos
+
+`nest build` sin adaptación continúa fallando por la API clásica; su sonda negativa se conserva. La nueva emisión programática no proporciona transformadores clásicos, plugins Nest, aliases, assets o watch. El ejemplo es un consumidor de la API nativa, no una modificación encubierta de Nest CLI.
+
+La inspección de Nest CLI 12.0.1 confirma que carga la configuración mediante la API clásica antes de seleccionar builder y no tiene un hook público de builder arbitrario. La siguiente integración debe cubrir ese flujo completo o definir una fachada con alcance suficiente.
+
+Oxc/editor, otras sintaxis Rust, generación de adaptadores y publicación npm permanecen pendientes. H5 ha avanzado, pero no está cerrado. Los resultados de CI y el commit de merge de esta entrega se identifican en su PR.

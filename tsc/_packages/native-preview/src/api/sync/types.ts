@@ -359,3 +359,19 @@ export interface Diagnostic {
     /** Related diagnostic information */
     readonly relatedInformation?: readonly Diagnostic[] | undefined;
 }
+
+/** An output captured in memory by the experimental Typers project emitter. */
+export interface TypersEmitOutput {
+    readonly fileName: string;
+    /** Complete emitted content, including any configured BOM or inline source map. */
+    readonly text: string;
+}
+
+/** Result of emitting one project from an existing snapshot; no files are written. */
+export interface TypersEmitResult {
+    readonly emitSkipped: boolean;
+    /** Config, syntax, binding, type, global and declaration/emit diagnostics. */
+    readonly diagnostics: readonly Diagnostic[];
+    /** Outputs sorted by fileName. Paths describe intended output locations only. */
+    readonly outputs: readonly TypersEmitOutput[];
+}

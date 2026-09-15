@@ -2,6 +2,8 @@
 
 [Índice de documentación](README.md) · [Arquitectura](architecture.md) · [Adaptadores](adapters.md)
 
+El [registro de estado](status.md) contiene la evidencia de ejecución actual. La [API nativa](native-api.md) documenta las subrutas ya distribuidas y la operación propia de emisión; la entrada raíz continúa sin proporcionar la API clásica.
+
 ## 1. Qué significa «100 % compatible»
 
 **Aceptado como objetivo:** preservar TypeScript y añadir capacidades. **No demostrado:** compatibilidad universal con todas las versiones, paquetes y herramientas del ecosistema.
@@ -204,7 +206,7 @@ La versión upstream puede tener diferencias deliberadas frente a versiones ante
 
 ## 9. Matriz inicial y estados de reporte
 
-Este documento define pruebas futuras. No registra resultados de ejecución que todavía no existen. El informe de cada implementación debe enlazar comandos, resultados y commits.
+La tabla siguiente conserva el punto de partida de la documentación fundacional. No es el estado actual de implementación: consultar [estado](status.md). El informe de cada implementación debe enlazar comandos, resultados y commits.
 
 Estados permitidos:
 

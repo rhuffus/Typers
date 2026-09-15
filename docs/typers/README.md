@@ -13,6 +13,7 @@ Esta base registra la conversación de diseño y las decisiones iniciales. Permi
 | [Funcionalidades](features.md) | Catálogo, complejidad y dependencias |
 | [Lenguaje](language.md) | Semántica y ejemplos |
 | [Arquitectura](architecture.md) | Compilación, runtime, APIs y AST |
+| [API nativa](native-api.md) | Cliente distribuido, snapshots, emisión programática y límites de Nest CLI |
 | [Compatibilidad](compatibility.md) | Sustitución y herramientas por capa |
 | [Adaptadores](adapters.md) | Conversión de APIs JS/TS a Result/Option |
 | [Desarrollo con IA](ai-development.md) | Ergonomía y evaluación |
