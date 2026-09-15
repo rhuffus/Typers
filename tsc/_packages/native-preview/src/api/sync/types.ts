@@ -374,4 +374,6 @@ export interface TypersEmitResult {
     readonly diagnostics: readonly Diagnostic[];
     /** Outputs sorted by fileName. Paths describe intended output locations only. */
     readonly outputs: readonly TypersEmitOutput[];
+    /** Sorted, unique config paths retained by the snapshot, including transitive extends. */
+    readonly configFileNames: readonly string[];
 }

@@ -120,3 +120,72 @@ Comando integrado: `node tooling/compatibility.mjs`. El informe actual sigue en 
 La inspección de Nest CLI 12.0.1 confirma que carga la configuración mediante la API clásica antes de seleccionar builder y no tiene un hook público de builder arbitrario. La siguiente integración debe cubrir ese flujo completo o definir una fachada con alcance suficiente.
 
 Oxc/editor, otras sintaxis Rust, generación de adaptadores y publicación npm permanecen pendientes. H5 ha avanzado, pero no está cerrado. Los resultados de CI y el commit de merge de esta entrega se identifican en su PR.
+
+La entrega de API se integró mediante [PR #3](https://github.com/rhuffus/Typers/pull/3), merge `697c74e768713f700b59ec0f208e26e03ddcb455`. Su [CI en Linux](https://github.com/rhuffus/Typers/actions/runs/34979399824) terminó correctamente antes del merge.
+
+## 2026-09-15 — Adaptador explícito de build para NestJS
+
+### Implementado
+
+- Paquete local `@typers/nest@0.1.0-alpha.0`, comando `typers-nest build` y API ESM
+  `buildNest(options)` con declaraciones públicas. Contrato en el
+  [README del paquete](../../packages/nest/README.md) y [ADR 0006](decisions/0006-nest-build-adapter.md).
+- Resolución del compilador instalado en el proyecto bajo `typescript` o
+  `@typers/compiler`, con comprobación de identidad y uso de la API nativa.
+- Lectura de configuración Nest, selección raíz o proyecto por nombre, herencia
+  de propiedades, precedencias de tsconfig y sobrescrituras explícitas del CLI.
+- Planificación de assets con patrones, directorios, exclusiones, archivos
+  ocultos y bytes binarios; destinos relativos a rootDir, con outDir alternativo.
+- Diagnósticos y emisión en memoria antes de limpiar o escribir; errores de
+  compilación o validación previa y `noEmit` conservan las salidas existentes.
+- Validación de destinos, symlinks y colisiones, incluyendo diferencias de
+  mayúsculas/minúsculas en el filesystem local.
+- `configFileNames` en la respuesta nativa: configuración seleccionada y cadena
+  de `extends`. Protege configuraciones heredadas que puedan estar dentro de
+  outDir, sin reimplementar el parser de tsconfig en JavaScript.
+- Tercer tarball en el consumidor reproducible y nuevos scripts `build:nest` y
+  `build:nest:typers`. Se conserva la comprobación de hashes y lock externo.
+
+El adaptador no depende de Nest CLI ni incorpora un segundo compilador. Añade
+`minimatch@10.2.6` y sus dos dependencias transitivas fijadas; el lock del ejemplo
+mantiene las versiones de las dependencias externas que ya existían.
+
+### Verificación local completada
+
+Entorno: macOS arm64, Node 24.20.0, npm 11.19.0 y Go 1.27.1. Base TypeScript 7.0.2;
+NestJS 12.0.3 y sonda de Nest CLI 12.0.1.
+
+| Comprobación | Resultado |
+| --- | --- |
+| Suite nativa `go test ./...` | 56 paquetes con tests correctos y 43 sin tests; ningún fallo |
+| RPC de emisión, enfocado y con `-race` | Correcto; incluye cadena de extends con arrays, duplicados y herencia transitiva, noEmit y errores |
+| Runtime Result/Option | 13/13 tests correctos |
+| Configuración, assets y rutas del adaptador | 12/12 tests correctos |
+| Consumidor instalado | Tres tarballs, 336 hashes comprobados y lock externo preservado |
+| Integración del adaptador | 7 grupos positivos y 17 rechazos que preservan salidas |
+| Herencia de tsconfig dentro de outDir | Casos directo y transitivo rechazados sin modificar configuraciones ni build previo |
+| NestJS estándar/if-let mediante adaptador | 9/12 archivos de emisión respectivamente, idénticos byte a byte al CLI; DI, metadata y HTTP 200/404 correctos |
+| Tipos públicos del adaptador y API nativa | Consumidores comprobados con el compilador Typers instalado |
+| API sync/async y comparación con upstream | Conservadas; verifican también la nueva metadata de configuración |
+| JavaScript, documentación y whitespace | Sintaxis, enlaces locales mantenidos y diff comprobados |
+
+Comandos: `node tooling/compatibility.mjs`, `go test ./...` desde `tsc/` y
+`go test [-race] ./internal/api -run TestTypersEmitProject -count=1` por separado.
+Informes generados: `built/typers/compatibility.json`,
+`built/typers/nest-build-compatibility.log` y `tsc/built/typers-nest-native-tests.log`.
+La CI del PR repite la suite nativa y el consumidor en Linux.
+
+### Alcance y siguiente trabajo
+
+Esta entrega cubre un build explícito de un proyecto por invocación. El comando
+original `nest build` sigue siendo incompatible con la API clásica disponible;
+su sonda negativa permanece visible. H5 continúa parcial.
+
+Aliases, plugins y transformadores, incremental en la API, referencias entre
+proyectos, watch y ejecución concurrente no están soportados por el adaptador.
+La preparación previa no garantiza rollback ante fallos de IO. Oxc/editor,
+otras sintaxis, adaptadores de librerías y publicación npm siguen pendientes.
+
+Próximo paso recomendado: definir la reescritura nativa de aliases con pruebas de
+JS, declaraciones, mapas y resolución NodeNext/ESM; después abordar un plugin
+Nest representativo y el flujo Oxc/editor, según la [hoja de ruta](roadmap.md).

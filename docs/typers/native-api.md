@@ -60,6 +60,8 @@ try {
 
 El ejemplo no escribe los resultados. Para un uso que sí los guarda, consultar [`examples/nestjs/build-api.mjs`](../../examples/nestjs/build-api.mjs). El cliente síncrono ofrece las mismas operaciones pertinentes sin devolver promesas. Cerrar la API y liberar las vistas evita retener procesos y memoria.
 
+El paquete [`@typers/nest`](../../packages/nest/README.md) añade un consumidor más completo de esta operación: lee configuración de Nest, selecciona un proyecto y planifica assets y escrituras antes de modificar las salidas. Mantiene esas responsabilidades fuera de la API del compilador. Su comando es `typers-nest build`; la API clásica del comando original de Nest continúa pendiente.
+
 ## `project.typersEmitProject()`
 
 Es una ampliación propia de Typers. El nombre distingue esta operación del contrato upstream y se conserva en el método RPC `typersEmitProject`. La operación de upstream `project.emitter.printNode()` imprime AST; no equivale a compilar un proyecto y eliminar los tipos.
@@ -74,6 +76,7 @@ interface TypersEmitResult {
   readonly emitSkipped: boolean;
   readonly diagnostics: readonly Diagnostic[];
   readonly outputs: readonly TypersEmitOutput[];
+  readonly configFileNames: readonly string[];
 }
 ```
 
@@ -83,6 +86,7 @@ Contrato:
 - Recoge diagnósticos de configuración, sintaxis, binding, tipos, proyecto/globales y declaraciones. Los ordena y elimina duplicados mediante las utilidades del compilador.
 - Devuelve JavaScript, declaraciones y mapas según la configuración. La metadata de decoradores y el lowering de if-let atraviesan los mismos transformadores nativos que el CLI.
 - Captura todos los archivos en memoria, con resultados ordenados por nombre. No escribe, borra ni crea directorios del proyecto.
+- `configFileNames` contiene las rutas absolutas normalizadas de la configuración seleccionada y su cadena de `extends`, ordenadas y sin duplicados. También está presente cuando no se emite o hay diagnósticos de error; en un proyecto inferido sin tsconfig es `[]`. El adaptador Nest utiliza esta información para proteger sus entradas antes de limpiar o escribir salidas.
 - `noEmit` devuelve `emitSkipped: true` y `outputs: []`, conservando los diagnósticos.
 - `noEmitOnError` impide emitir cuando hay diagnósticos que bloquean la emisión. Si está desactivado, pueden coexistir archivos emitidos y errores: el consumidor debe examinar ambos campos.
 - `emitDeclarationOnly` conserva el comportamiento de declaraciones del compilador.
@@ -130,7 +134,7 @@ No es el comando `nest build`. Nest CLI 12.0.1 necesita la API clásica antes de
 | `before`/`after`/`afterDeclarations` | Impresión y utilidades AST | Transformadores compatibles o plugins adaptados |
 | Reescritura de `paths`, Swagger, GraphQL | Sin cobertura equivalente verificada | Casos concretos, configuración y pruebas |
 
-Siguiente paso para Nest: elegir y probar una adaptación explícita de su proceso de build, o una fachada clásica con alcance suficientemente completo. La nueva operación proporciona una base; no cierra la brecha de compatibilidad histórica ni decide por adelantado entre esas dos arquitecturas.
+La adaptación explícita se ha concretado en [`@typers/nest`](../../packages/nest/README.md), según [ADR 0006](decisions/0006-nest-build-adapter.md). Cubre configuración, selección de proyecto, assets y escrituras mediante `typers-nest build`. La tabla anterior sigue describiendo el trabajo para consumidores de la API clásica. Los próximos pasos del adaptador son aliases y transformadores nativos con sus contratos y pruebas; la compatibilidad histórica permanece abierta.
 
 ## Validación reproducible
 
@@ -144,4 +148,4 @@ node tooling/compatibility.mjs
 
 El harness crea tarballs e instala un consumidor nuevo. Comprueba hashes del código distribuido, importación de las once subrutas, clientes sync/async sin override de ejecutable, AST/tipos/diagnósticos, emisión en memoria y consumo de las declaraciones instaladas. Comprueba también el script mantenido del ejemplo y conserva la sonda negativa de `nest build`.
 
-Las pruebas Go del RPC cubren opciones de emisión, diagnósticos, ausencia de escrituras, vistas antiguas/nuevas, cancelación, captura multifuente y rechazo de modos no soportados. Su comando enfocado es `go test ./internal/api -run TestTypersEmitProject -count=1`, desde `tsc/`. Ver [estado](status.md) para los resultados de cada entrega y [ADR 0005](decisions/0005-native-api-and-project-emission.md) para la decisión.
+Las pruebas Go del RPC cubren opciones de emisión, diagnósticos, configuraciones heredadas, ausencia de escrituras, vistas antiguas/nuevas, cancelación, captura multifuente y rechazo de modos no soportados. Su comando enfocado es `go test ./internal/api -run TestTypersEmitProject -count=1`, desde `tsc/`. Ver [estado](status.md) para los resultados de cada entrega y [ADR 0005](decisions/0005-native-api-and-project-emission.md) para la decisión.

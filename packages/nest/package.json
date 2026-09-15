@@ -1,0 +1,18 @@
+{
+  "name": "@typers/nest",
+  "version": "0.1.0-alpha.0",
+  "private": true,
+  "description": "Experimental NestJS build adapter for the native Typers compiler",
+  "license": "Apache-2.0",
+  "repository": "github:rhuffus/Typers",
+  "type": "module",
+  "engines": { "node": ">=24" },
+  "bin": { "typers-nest": "bin/typers-nest.mjs" },
+  "exports": {
+    ".": { "types": "./src/build.d.ts", "default": "./src/build.mjs" },
+    "./package.json": "./package.json"
+  },
+  "files": ["bin", "src", "README.md", "LICENSE.txt"],
+  "scripts": { "test": "node --test test/*.test.mjs" },
+  "dependencies": { "minimatch": "10.2.6" }
+}

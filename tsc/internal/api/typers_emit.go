@@ -9,6 +9,7 @@ import (
 
 	"github.com/microsoft/typescript-go/internal/compiler"
 	"github.com/microsoft/typescript-go/internal/core"
+	"github.com/microsoft/typescript-go/internal/tspath"
 )
 
 type TypersEmitOutput struct {
@@ -17,9 +18,10 @@ type TypersEmitOutput struct {
 }
 
 type TypersEmitResult struct {
-	EmitSkipped bool                  `json:"emitSkipped"`
-	Diagnostics []*DiagnosticResponse `json:"diagnostics"`
-	Outputs     []TypersEmitOutput    `json:"outputs"`
+	EmitSkipped     bool                  `json:"emitSkipped"`
+	Diagnostics     []*DiagnosticResponse `json:"diagnostics"`
+	Outputs         []TypersEmitOutput    `json:"outputs"`
+	ConfigFileNames []string              `json:"configFileNames"`
 }
 
 // handleTypersEmitProject emits the selected snapshot's project to memory. It is
@@ -67,7 +69,21 @@ func (s *Session) handleTypersEmitProject(ctx context.Context, params *GetProjec
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
-	result := &TypersEmitResult{Outputs: []TypersEmitOutput{}}
+	// These are the configuration files retained by this program's snapshot,
+	// including transitive extends. Consumers must not reparse the live files to
+	// discover which inputs need protection before publishing captured outputs.
+	commandLine := program.CommandLine()
+	configFileNames := make([]string, 0, len(commandLine.ExtendedSourceFiles())+1)
+	for _, fileName := range append([]string{commandLine.ConfigName()}, commandLine.ExtendedSourceFiles()...) {
+		if fileName != "" {
+			configFileNames = append(configFileNames, tspath.GetNormalizedAbsolutePath(fileName, program.GetCurrentDirectory()))
+		}
+	}
+	slices.Sort(configFileNames)
+	result := &TypersEmitResult{
+		Outputs:         []TypersEmitOutput{},
+		ConfigFileNames: slices.Compact(configFileNames),
+	}
 	if options.NoEmit.IsTrue() || options.NoEmitOnError.IsTrue() && len(diags) != 0 {
 		result.EmitSkipped = true
 	} else {
