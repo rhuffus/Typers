@@ -53,17 +53,20 @@ La infraestructura nativa está en `tsc/`. Con dependencias y corpus preparados,
 
 ```sh
 go build -o built/local/typers ./cmd/tsgo
+npm ci --ignore-scripts --no-audit --no-fund
 go test ./internal/parser ./internal/ast ./internal/checker
 go test ./...
 ```
 
 Son comandos de referencia del código base, no un registro de pruebas ya realizadas. Algunos tests usan el corpus fijado en `tsc/_submodules/TypeScript`; ver [mantenimiento](maintenance.md). El build de distribución debe incluir las bibliotecas estándar según su mecanismo real, que se verificará en H0. Un binario que arranca sin encontrar `lib.d.ts` no pasa aceptación.
 
+Las pruebas nativas de navegación de tokens comparan resultados con el compilador JS instalado como dependencia de desarrollo en `tsc/node_modules`. Esa referencia de pruebas no forma parte del paquete del compilador Typers ni de la aplicación consumidora. Debe instalarse mediante el lockfile upstream; no sustituirla silenciosamente por otra API.
+
 Para cambios de código Go: ejecutar `gofmt` sobre los archivos modificados, tests enfocados y la suite nativa antes de fusionar cambios del compilador. Los linters y generadores específicos de upstream pueden requerir `npm ci` y tareas de `tsc/Herebyfile.mjs`; revisar sus entradas antes de ejecutar una regeneración general.
 
 Los comandos de la raíz (`npx hereby runtests-parallel`, `npx hereby lint`, `npx hereby format`) pertenecen al compilador legacy. Aplican cuando se modifica ese código; no reemplazan las pruebas del compilador nativo.
 
-Para documentación: comprobar enlaces locales nuevos y `git diff --check`. Los documentos originales archivados conservan enlaces relativos históricos y se consideran referencia inalterada.
+Para documentación: comprobar enlaces locales nuevos y `git diff --check`. En cambios que conservan CRLF de upstream, usar `git -c core.whitespace=cr-at-eol diff --check` para no clasificar el retorno de carro como espacio final. Los documentos originales archivados conservan enlaces relativos históricos y se consideran referencia histórica normalizada.
 
 ## CI y revisión
 

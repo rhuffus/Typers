@@ -101,6 +101,7 @@ type Parser struct {
 	currentParent        *ast.Node
 	setParentFromContext ast.Visitor
 	reparsedClones       []*ast.Node
+	typersTemporaries    [][]*ast.Node
 }
 
 func newParser() *Parser {
@@ -344,6 +345,7 @@ type ParserState struct {
 	jsDiagnosticsLen            int
 	jsdocInfosLen               int
 	reparsedClonesLen           int
+	typersTemporariesLen        int
 	statementHasAwaitIdentifier bool
 	hasParseError               bool
 }
@@ -356,6 +358,7 @@ func (p *Parser) mark() ParserState {
 		jsDiagnosticsLen:            len(p.jsDiagnostics),
 		jsdocInfosLen:               len(p.jsdocInfos),
 		reparsedClonesLen:           len(p.reparsedClones),
+		typersTemporariesLen:        len(p.typersTemporaries),
 		statementHasAwaitIdentifier: p.statementHasAwaitIdentifier,
 		hasParseError:               p.hasParseError,
 	}
@@ -369,6 +372,7 @@ func (p *Parser) rewind(state ParserState) {
 	p.jsDiagnostics = p.jsDiagnostics[0:state.jsDiagnosticsLen]
 	p.jsdocInfos = p.jsdocInfos[0:state.jsdocInfosLen]
 	p.reparsedClones = p.reparsedClones[0:state.reparsedClonesLen]
+	p.typersTemporaries = p.typersTemporaries[0:state.typersTemporariesLen]
 	p.statementHasAwaitIdentifier = state.statementHasAwaitIdentifier
 	p.hasParseError = state.hasParseError
 }
@@ -455,6 +459,7 @@ func (p *Parser) parseSourceFileWorker() *ast.SourceFile {
 			p.finishSourceFile(result, isDeclarationFile)
 		}
 	}
+	p.finalizeTypersTemporaries()
 	collectExternalModuleReferences(result)
 	if ast.IsInJSFile(node) {
 		result.SetJSDiagnostics(attachFileToDiagnostics(p.jsDiagnostics, result))
@@ -1242,6 +1247,9 @@ func (p *Parser) parseIfStatement() *ast.Node {
 	pos := p.nodePos()
 	jsdoc := p.jsdocScannerInfo()
 	p.parseExpected(ast.KindIfKeyword)
+	if p.opts.ExperimentalTypersSyntax && p.token == ast.KindLetKeyword && !p.isJavaScript() && p.contextFlags&ast.NodeFlagsAmbient == 0 {
+		return p.parseTypersIfLet(pos, jsdoc)
+	}
 	openParenPosition := p.scanner.TokenStart()
 	openParenParsed := p.parseExpected(ast.KindOpenParenToken)
 	expression := p.parseExpressionAllowIn()

@@ -910,6 +910,18 @@ var optionsForCompiler = []*CommandLineOption{
 
 	// Experimental
 	{
+		Name:                       "experimentalTypersSyntax",
+		Kind:                       CommandLineOptionTypeBoolean,
+		AffectsSourceFile:          true,
+		AffectsBindDiagnostics:     true,
+		AffectsSemanticDiagnostics: true,
+		AffectsEmit:                true,
+		AffectsBuildInfo:           true,
+		Category:                   diagnostics.Language_and_Environment,
+		Description:                diagnostics.Typers_Enable_experimental_syntax,
+		DefaultValueDescription:    false,
+	},
+	{
 		Name:                       "experimentalDecorators",
 		Kind:                       CommandLineOptionTypeBoolean,
 		AffectsEmit:                true,

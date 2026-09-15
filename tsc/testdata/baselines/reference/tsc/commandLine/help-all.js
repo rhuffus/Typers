@@ -520,6 +520,11 @@ Enable experimental support for legacy experimental decorators.
 type: boolean
 default: false
 
+[94m--experimentalTypersSyntax[39m
+Enable experimental Typers syntax.
+type: boolean
+default: false
+
 [94m--jsx[39m
 Specify what JSX code is generated.
 one of: preserve, react-native, react-jsx, react-jsxdev, react

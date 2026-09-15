@@ -1,12 +1,17 @@
 # Diseño del lenguaje Typers
 
 Este documento conserva el diseño inicial discutido para Typers y concreta las
-preguntas que deben resolverse antes de ampliar el compilador. **Los ejemplos con
-sintaxis nueva son propuestas: no significan que esa sintaxis esté implementada.**
+preguntas que deben resolverse antes de ampliar el compilador. **Los ejemplos de
+extensiones posteriores son propuestas; solo el subconjunto inicial de if-let
+descrito en ADR 0004 pertenece al prototipo experimental.**
 El estado ejecutable de cada funcionalidad debe comprobarse en el código, sus
 pruebas y las notas de la versión correspondiente.
 
 El catálogo y las prioridades se desarrollan en [features.md](features.md).
+El primer contrato experimental de Result/Option e if-let se concreta en
+[ADR 0004](decisions/0004-experimental-runtime-and-if-let.md). Ese registro resuelve
+las alternativas iniciales de representación, activación y reconocimiento para el
+prototipo; las demás extensiones de este documento siguen siendo propuestas.
 
 ## 1. Estados de las decisiones
 
@@ -195,8 +200,9 @@ manejo de errores de dominio.
 
 ### 4.4. Identidad reconocida por la sintaxis
 
-Queda abierta una decisión fundamental: qué hace que un tipo sea el `Option` o
-`Result` reconocido por Typers.
+Se consideraron estas alternativas para reconocer `Option` y `Result`. El
+prototipo de if-let selecciona el protocolo estructural de ADR 0004; las futuras
+extensiones deben revisar si conservan ese contrato.
 
 | Alternativa | Ventaja | Riesgo |
 | --- | --- | --- |

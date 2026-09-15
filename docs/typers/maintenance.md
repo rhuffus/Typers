@@ -26,7 +26,7 @@ El filtro pertenece al clon local. GitHub conserva el fork y su historial. No co
 | `docs/typers/` | Diseño y estado propios |
 | `docs/typers/upstream/` | Documentos originales de referencia |
 
-Las rutas de paquetes propios, scripts y ejemplos se fijarán en H0 evitando mezclar indiscriminadamente tareas nuevas con el build legacy. El nombre del módulo Go puede conservar el identificador upstream sin que eso cambie el destino de PRs ni la identidad del producto.
+H0 introduce `packages/compiler`, `packages/core`, `tooling/` y `examples/nestjs/`, separados del build legacy. La [guía de primeros pasos](getting-started.md) contiene los comandos efectivos. El nombre del módulo Go conserva el identificador upstream sin cambiar el destino de PRs ni la identidad del producto.
 
 ## Entorno inicial
 

@@ -7,6 +7,7 @@ Un ADR registra contexto, decisión, consecuencias y criterios de revisión. No 
 | [0001 — Fundación](0001-project-foundation.md) | Aceptado | Fork, base, nombre, historial y emisión |
 | [0002 — Compatibilidad](0002-compatibility-contract.md) | Aceptado como objetivo; diseño parcial | Contratos por capa y evidencia |
 | [0003 — Primer incremento](0003-first-increment.md) | Aceptado como orden de trabajo | Paquete, runtime, if-let |
+| [0004 — Runtime e if-let experimental](0004-experimental-runtime-and-if-let.md) | Aceptado para prototipo | Representación, activación y semántica limitada |
 
 ## Decisiones futuras previstas
 

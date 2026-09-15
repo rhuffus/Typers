@@ -1,0 +1,41 @@
+name: Typers
+
+on:
+  push:
+    branches: [typers-main]
+  pull_request:
+    branches: [typers-main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: typers-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  native-and-consumer:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
+        with:
+          node-version: '24.20.0'
+      - name: Select Go toolchain
+        run: |
+          go version
+          go env -w GOTOOLCHAIN=go1.27.1+auto
+      - name: Prepare the pinned upstream test corpus
+        run: node tooling/prepare-test-corpus.mjs
+      - name: Install upstream test dependencies
+        run: npm --prefix tsc ci --ignore-scripts --no-audit --no-fund
+      - name: Native regression suite
+        working-directory: tsc
+        run: go test ./...
+      - name: Install pinned verification tools
+        run: npm --prefix tooling ci --ignore-scripts --no-audit --no-fund
+      - name: Build, test runtime, and verify installed NestJS consumer
+        run: node tooling/compatibility.mjs
