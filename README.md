@@ -1,61 +1,35 @@
-# TypeScript
+# Typers
 
-<!-- CODING AGENTS: READ AGENTS.md BEFORE WRITING CODE -->
+> Typers extends TypeScript with Rust-inspired syntax and explicit error handling, compiling to JavaScript.
 
-[![CI](https://github.com/microsoft/TypeScript/actions/workflows/ci.yml/badge.svg)](https://github.com/microsoft/TypeScript/actions/workflows/ci.yml)
-[![npm version](https://badge.fury.io/js/typescript.svg)](https://www.npmjs.com/package/typescript)
-[![Downloads](https://img.shields.io/npm/dm/typescript.svg)](https://www.npmjs.com/package/typescript)
-[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/microsoft/TypeScript/badge)](https://securityscorecards.dev/viewer/?uri=github.com/microsoft/TypeScript)
+Typers es un fork experimental de TypeScript para explorar resultados y valores opcionales, patrones y propagación explícita de errores en proyectos TypeScript y NestJS, especialmente en zhenix-ai.
 
+**Estado:** fase inicial. La descripción expresa la dirección del proyecto; no significa que las extensiones estén implementadas ni que exista compatibilidad universal con herramientas TypeScript. Consulta la [hoja de ruta](docs/typers/roadmap.md) y el [registro de implementación](docs/typers/status.md).
 
-[TypeScript](https://www.typescriptlang.org/) is a language for application-scale JavaScript. TypeScript adds optional types to JavaScript that support tools for large-scale JavaScript applications for any browser, for any host, on any OS. TypeScript compiles to readable, standards-based JavaScript. Try it out at the [playground](https://www.typescriptlang.org/play/), and stay up to date via [our blog](https://blogs.msdn.microsoft.com/typescript) and [Twitter account](https://twitter.com/typescript).
+## Documentación
 
-Find others who are using TypeScript at [our community page](https://www.typescriptlang.org/community/).
+- [Índice y guía de lectura](docs/typers/README.md).
+- [Visión y alcance](docs/typers/vision.md).
+- [Funcionalidades y complejidad](docs/typers/features.md).
+- [Diseño del lenguaje](docs/typers/language.md).
+- [Arquitectura](docs/typers/architecture.md) y [compatibilidad](docs/typers/compatibility.md).
+- [Hoja de ruta](docs/typers/roadmap.md), [validación](docs/typers/validation.md) y [decisiones](docs/typers/decisions/README.md).
+- [Desarrollo y mantenimiento](docs/typers/maintenance.md).
 
-## Installing
+## Base y organización
 
-For the latest stable version:
+| Elemento | Ubicación / valor |
+| --- | --- |
+| Repositorio | [rhuffus/Typers](https://github.com/rhuffus/Typers) |
+| Rama principal | `typers-main` |
+| Base inicial | TypeScript `v7.0.2` — `1e4744d68260a7cb91b62b12edc3f6a2187faaf1` |
+| Compilador nativo Go | [`tsc/`](tsc/) |
+| Infraestructura heredada del compilador JS | `src/`, `tests/` y scripts de raíz |
 
-```bash
-npm install -D typescript
-```
+Todavía no hay una versión pública de Typers. El primer hito crea un paquete local y comprueba un consumidor NestJS, distinguiendo compatibilidad del ejecutable y compatibilidad de la API del compilador.
 
-For our nightly builds:
+## Contribución y licencia
 
-```bash
-npm install -D typescript@next
-```
+Lee [AGENTS.md](AGENTS.md) y la [guía de mantenimiento](docs/typers/maintenance.md). Las contribuciones a Typers se dirigen a este fork.
 
-## Contribute
-
-**NOTE: Code changes in this repo are now limited to a small category of fixes**:
-
- * Crashes that were introduced in 5.9 or 6.0 that *also* repro in 7.0 *and* have a portable fix *and* don't incur other behavioral changes
- * Security issues
- * Language service crashes that substantially impact mainline usage
- * Serious regressions from 5.9 (these must *seriously* impact a *large* proportion of users)
-
-Most bug fixes should be submitted to the [typescript-go](https://github.com/microsoft/TypeScript-go) repository.
-Feature additions and behavioral changes are currently on pause until TypeScript 7.0 is completed.
-
-There are many ways to [contribute](https://github.com/microsoft/TypeScript/blob/main/CONTRIBUTING.md) to TypeScript.
-* [Submit bugs](https://github.com/microsoft/TypeScript/issues) and help us verify fixes as they are checked in.
-* Review the [source code changes](https://github.com/microsoft/TypeScript/pulls).
-* Engage with other TypeScript users and developers on [StackOverflow](https://stackoverflow.com/questions/tagged/typescript).
-* Help each other in the [TypeScript Community Discord](https://discord.gg/typescript).
-* Join the [#typescript](https://twitter.com/search?q=%23TypeScript) discussion on Twitter.
-* [Contribute bug fixes](https://github.com/microsoft/TypeScript/blob/main/CONTRIBUTING.md).
-
-This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see
-the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com)
-with any additional questions or comments.
-
-## Documentation
-
-*  [TypeScript in 5 minutes](https://www.typescriptlang.org/docs/handbook/typescript-in-5-minutes.html)
-*  [Programming handbook](https://www.typescriptlang.org/docs/handbook/intro.html)
-*  [Homepage](https://www.typescriptlang.org/)
-
-## Roadmap
-
-For details on our planned features and future direction, please refer to our [roadmap](https://github.com/microsoft/TypeScript/wiki/Roadmap).
+Basado en TypeScript de Microsoft, bajo [Apache-2.0](LICENSE.txt). Se conservan los avisos de terceros y la [documentación original](docs/typers/upstream/README.original.md). Typers es un proyecto independiente.
