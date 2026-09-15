@@ -110,13 +110,15 @@ import type {
     TypePredicate,
     TypePredicateBase,
     TypeReference,
+    TypersEmitOutput,
+    TypersEmitResult,
     UnionOrIntersectionType,
     UnionType,
 } from "./types.ts";
 
 export { documentURIToFileName, fileNameToDocumentURI } from "../path.ts";
 export { CompletionItemKind, DiagnosticCategory, ElementFlags, ModifierFlags, ModuleKind, NodeBuilderFlags, ObjectFlags, SignatureFlags, SignatureKind, SymbolFlags, TypeFlags, TypePredicateKind };
-export type { APIOptions, AssertsIdentifierTypePredicate, AssertsThisTypePredicate, BigIntLiteralType, BooleanLiteralType, ClientSocketOptions, ClientSpawnOptions, CompilerOptions, CompletionEntry, CompletionInfo, CompletionOptions, ConditionalType, Diagnostic, DocumentIdentifier, DocumentPosition, FreshableType, IdentifierTypePredicate, IndexedAccessType, IndexInfo, IndexType, InterfaceType, IntersectionType, IntrinsicType, JSDocTagInfo, LiteralType, LSPConnectionOptions, NumberLiteralType, ObjectType, RequestTiming, SourceFileMetadata, StringLiteralType, StringMappingType, SubstitutionType, TemplateLiteralType, ThisTypePredicate, TimingAccumulators, TimingInfo, TupleType, Type, TypeParameter, TypePredicate, TypePredicateBase, TypeReference, UnionOrIntersectionType, UnionType };
+export type { APIOptions, AssertsIdentifierTypePredicate, AssertsThisTypePredicate, BigIntLiteralType, BooleanLiteralType, ClientSocketOptions, ClientSpawnOptions, CompilerOptions, CompletionEntry, CompletionInfo, CompletionOptions, ConditionalType, Diagnostic, DocumentIdentifier, DocumentPosition, FreshableType, IdentifierTypePredicate, IndexedAccessType, IndexInfo, IndexType, InterfaceType, IntersectionType, IntrinsicType, JSDocTagInfo, LiteralType, LSPConnectionOptions, NumberLiteralType, ObjectType, RequestTiming, SourceFileMetadata, StringLiteralType, StringMappingType, SubstitutionType, TemplateLiteralType, ThisTypePredicate, TimingAccumulators, TimingInfo, TupleType, Type, TypeParameter, TypePredicate, TypePredicateBase, TypeReference, TypersEmitOutput, TypersEmitResult, UnionOrIntersectionType, UnionType };
 
 export class API<FromLSP extends boolean = false> {
     private client: Client;
@@ -548,6 +550,7 @@ export class Project {
     readonly checker: Checker;
     readonly emitter: Emitter;
     private client: Client;
+    private readonly snapshotId: number;
 
     constructor(
         data: ProjectResponse,
@@ -562,6 +565,7 @@ export class Project {
         this.compilerOptions = data.compilerOptions;
         this.rootFiles = data.rootFiles;
         this.client = client;
+        this.snapshotId = snapshotId;
         this.program = new Program(
             snapshotId,
             this,
@@ -577,6 +581,21 @@ export class Project {
             objectRegistry,
         );
         this.emitter = new Emitter(client);
+    }
+
+    /**
+     * Experimental Typers extension: emit this snapshot's project to memory.
+     * Respects noEmit/noEmitOnError and the project's declaration/map settings.
+     * No files are written, no options are overridden, and no custom transformers
+     * are accepted. Incremental/composite projects and project references are
+     * rejected; use the Typers CLI for build graphs and build information.
+     * The snapshot must remain alive until the request completes.
+     */
+    async typersEmitProject(): Promise<TypersEmitResult> {
+        return this.client.apiRequest<TypersEmitResult>("typersEmitProject", {
+            snapshot: this.snapshotId,
+            project: this.id,
+        });
     }
 
     dispose(): void {

@@ -6,6 +6,8 @@ El orden prioriza aprendizaje y reducción de riesgo. La complejidad incluye par
 
 Estado inicial de todos los hitos de código: **pendiente**. La documentación es la entrega previa. Los avances efectivos se registran en [estado](status.md).
 
+Avance posterior: H0 CLI, H1 y H2 tienen un prototipo verificado. H5 incorpora clientes nativos distribuidos y emisión programática, según [ADR 0005](decisions/0005-native-api-and-project-emission.md). La API clásica/Nest CLI y Oxc/editor siguen abiertos; no se considera H5 terminado por disponer de la API nueva.
+
 ## H0 — Base reproducible y paquete de compilador
 
 **Complejidad:** media para CLI; alta o muy alta para compatibilidad de API histórica.
@@ -91,6 +93,8 @@ No implementarlo con reemplazos de texto ni con una IIFE que cambie el destino d
 - Prueba de bibliotecas externas consumiendo JavaScript y declaraciones emitidas.
 
 No es necesario terminar toda esta superficie para experimentar; sí es necesario definirla antes de afirmar sustitución general o recomendar producción.
+
+La primera entrega de esta línea permite consultas sync/async y emisión de un proyecto a memoria, con el mismo núcleo que el CLI. No admite todavía build incremental ni referencias entre proyectos en esa operación. Próxima puerta: decisión e integración explícita para el build de Nest, incluyendo su configuración y transformadores, y definición del alcance de Oxc/editor. Ver [API nativa](native-api.md).
 
 ## H6 — Adaptadores de librerías
 

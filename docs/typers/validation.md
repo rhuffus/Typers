@@ -24,6 +24,10 @@ Un repositorio en memoria evita infraestructura externa. Un servicio busca un us
 
 Separar comandos de compilación CLI de `nest build`. El primero puede funcionar aunque el segundo requiera una API no disponible. Probar un plugin real como Swagger cuando se trabaje en la compatibilidad de transformadores. Fijar versiones en el lockfile; registrar la ruta resuelta de `typescript` y la procedencia del paquete.
 
+Desde ADR 0005 hay una tercera ruta: `build-api.mjs` en el ejemplo abre un proyecto nativo y utiliza `typersEmitProject`. Comparar todos sus archivos con el CLI y ejecutar sus módulos de forma independiente. No contar esta ruta como prueba de `nest build`.
+
+Las pruebas de API instalada deben importar las subrutas por el nombre de dependencia del consumidor, omitir `tsserverPath` y verificar los bytes instalados. Cubrir clientes sync/async, declaraciones, AST/tipos/diagnósticos, printer y emisión capturada. La petición de emisión no debe crear archivos: comprobar que solo los guarda el consumidor cuando acepta el resultado. También probar noEmit/noEmitOnError, errores globales/declaraciones, coherencia de snapshots y rechazo de incremental/composite/referencias.
+
 ## Comparación contra upstream
 
 - Usar `typescript@7.0.2` como referencia equivalente inicial, en un entorno de pruebas separado del consumidor Typers.

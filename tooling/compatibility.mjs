@@ -1,10 +1,11 @@
 import assert from "node:assert/strict";
 import { execFileSync, spawnSync } from "node:child_process";
 import { createRequire } from "node:module";
-import { readdirSync, readFileSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import path from "node:path";
 import { prepareConsumer } from "./prepare-consumer.mjs";
+import { testNativeApi } from "./test-native-api.mjs";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const npm = process.platform === "win32" ? "npm.cmd" : "npm";
@@ -48,7 +49,7 @@ expectSuccess(upstreamVersion);
 assert.equal(upstreamVersion.stdout.trim(), `Version ${upstreamMetadata.version}`);
 assert.equal(upstreamVersion.stderr, "");
 
-for (const directory of ["dist", "dist-upstream", "dist-typers"]) {
+for (const directory of ["dist", "dist-upstream", "dist-typers", "dist-api", "dist-api-typers", "dist-api-invalid"]) {
   rmSync(path.join(example, directory), { recursive: true, force: true });
 }
 
@@ -65,12 +66,16 @@ function emittedFiles(directory) {
   }
   return files.sort();
 }
-const emitted = emittedFiles(path.join(example, "dist"));
-assert.deepEqual(emitted, emittedFiles(path.join(example, "dist-upstream")), "Upstream and Typers emitted different file sets");
-assert.ok(emitted.includes("app.js") && emitted.includes("app.d.ts") && emitted.includes("app.js.map"));
-for (const file of emitted) {
-  assert.equal(readFileSync(path.join(example, "dist", file), "utf8"), readFileSync(path.join(example, "dist-upstream", file), "utf8"), `Upstream emission differs: ${file}`);
+function assertSameEmission(actual, expected, label) {
+  const emitted = emittedFiles(path.join(example, actual));
+  assert.deepEqual(emitted, emittedFiles(path.join(example, expected)), `${label}: different file sets`);
+  assert.ok(emitted.includes("app.js") && emitted.includes("app.d.ts") && emitted.includes("app.js.map"));
+  for (const file of emitted) {
+    assert.equal(readFileSync(path.join(example, actual, file), "utf8"), readFileSync(path.join(example, expected, file), "utf8"), `${label}: emission differs for ${file}`);
+  }
+  return emitted;
 }
+assertSameEmission("dist", "dist-upstream", "Typers CLI and upstream");
 
 const invalidDir = path.join(example, ".compatibility");
 mkdirSync(invalidDir, { recursive: true });
@@ -112,6 +117,30 @@ expectSuccess(cli(upstreamBin, [
   "--module", "NodeNext", ".compatibility/declarations.ts", "--pretty", "false",
 ]));
 
+const nativeApi = await testNativeApi(example);
+for (const [config, base, outDir, expected] of [
+  ["tsconfig.api.json", "./tsconfig.json", "dist-api", "dist"],
+  ["tsconfig.api-typers.json", "./tsconfig.typers.json", "dist-api-typers", "dist-typers"],
+]) {
+  writeFileSync(path.join(example, config), JSON.stringify({ extends: base, compilerOptions: { outDir } }));
+  const build = result(process.execPath, ["build-api.mjs", config]);
+  expectSuccess(build);
+  assert.match(build.stdout, /Typers native API: wrote \d+ files/);
+  assert.equal(build.stderr, "");
+  assertSameEmission(outDir, expected, `Native API and CLI (${config})`);
+}
+writeFileSync(path.join(example, "tsconfig.api-invalid.json"), JSON.stringify({
+  extends: "./tsconfig.json",
+  compilerOptions: { rootDir: ".compatibility", outDir: "dist-api-invalid", noEmitOnError: true },
+  include: [".compatibility/invalid.ts"],
+  exclude: [],
+}));
+const invalidApiBuild = result(process.execPath, ["build-api.mjs", "tsconfig.api-invalid.json"]);
+assert.equal(invalidApiBuild.error, undefined);
+assert.equal(invalidApiBuild.status, 1, invalidApiBuild.stdout + invalidApiBuild.stderr);
+assert.match(invalidApiBuild.stderr, /TS2322/);
+assert.equal(existsSync(path.join(example, "dist-api-invalid")), false, "An invalid API build wrote output");
+
 const { NestFactory } = await import(pathToFileURL(requireFromExample.resolve("@nestjs/core")).href);
 async function testHttp(module, label) {
   const app = await NestFactory.create(module, { logger: false });
@@ -133,6 +162,10 @@ const { AppModule } = await import(pathToFileURL(path.join(example, "dist/app.js
 await testHttp(AppModule, "NestJS standard TypeScript");
 const { PatternAppModule } = await import(pathToFileURL(path.join(example, "dist-typers/experimental.js")).href);
 await testHttp(PatternAppModule, "NestJS experimental if-let");
+const apiApp = await import(pathToFileURL(path.join(example, "dist-api/app.js")).href);
+await testHttp(apiApp.AppModule, "NestJS compiled through native API");
+const apiPatternApp = await import(pathToFileURL(path.join(example, "dist-api-typers/experimental.js")).href);
+await testHttp(apiPatternApp.PatternAppModule, "NestJS if-let compiled through native API");
 
 const classicApi = requireFromExample("typescript");
 const missing = ["getParsedCommandLineOfConfigFile", "createProgram", "createIncrementalProgram"].filter((key) => typeof classicApi[key] !== "function");
@@ -156,11 +189,13 @@ const report = {
   standardEmission: "identical JS, declarations and source maps for this fixture",
   invalidTypes: "same TS2322 diagnostic and exit status",
   emittedDeclarations: "TypeScript 7.0.2 consumes declarations emitted from the if-let module",
-  nestRuntime: "standard and experimental modules pass DI/metadata/HTTP tests",
+  nativeApi,
+  nativeApiEmission: "standard and if-let JS, declarations and maps identical to CLI; invalid build writes no files",
+  nestRuntime: "standard and experimental modules from CLI and native API pass DI/metadata/HTTP tests",
   classicCompilerApi: { status: "known unsupported", missing },
   nestBuild: { status: "known unsupported", diagnostic: (nestBuild.stdout + nestBuild.stderr).trim() },
   oxcAndEditor: "not yet adapted or verified for if-let",
 };
 writeFileSync(path.join(root, "built/typers/compatibility.json"), JSON.stringify(report, null, 2) + "\n");
-console.log("PASS: native CLI, package alias, standard output, invalid types and NestJS runtime.");
+console.log("PASS: native CLI/API, package alias, standard output, invalid types and NestJS runtime.");
 console.log("KNOWN UNSUPPORTED: Nest CLI compiler API; see built/typers/compatibility.json.");

@@ -178,7 +178,8 @@ const (
 	MethodGetConfigFileParsingDiagnostics Method = "getConfigFileParsingDiagnostics"
 
 	// Emitter methods
-	MethodPrintNode Method = "printNode"
+	MethodPrintNode         Method = "printNode"
+	MethodTypersEmitProject Method = "typersEmitProject"
 
 	// Intrinsic type getters
 	MethodGetAnyType       Method = "getAnyType"
@@ -451,6 +452,7 @@ var unmarshalers = map[Method]func([]byte) (any, error){
 	MethodGetSignatureUsages:                unmarshallerFor[GetSignatureUsagesParams],
 	MethodGetCompletionsAtPosition:          unmarshallerFor[GetCompletionsAtPositionParams],
 	MethodPrintNode:                         unmarshallerFor[PrintNodeParams],
+	MethodTypersEmitProject:                 unmarshallerFor[GetProjectDiagnosticsParams],
 	MethodGetAnyType:                        unmarshallerFor[GetIntrinsicTypeParams],
 	MethodGetStringType:                     unmarshallerFor[GetIntrinsicTypeParams],
 	MethodGetNumberType:                     unmarshallerFor[GetIntrinsicTypeParams],

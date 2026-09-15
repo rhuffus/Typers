@@ -368,13 +368,16 @@ type Session struct {
 	// snapshots maps snapshot handles to their data. Each snapshot has its own
 	// symbol/type registries.
 	//
-	// snapshotsMu guards the snapshots map and latestSnapshot. It is held only for
-	// short, map-bounded critical sections, never across slow work like a project
+	// snapshotsMu guards the snapshots map and latestSnapshot. It is normally held
+	// for short, map-bounded critical sections rather than slow work like a project
 	// snapshot update or checker queries. Read handlers (getSnapshotData and the
 	// language-service handlers built on it) take it for reading; handleRelease and
 	// the bookkeeping tail of handleUpdateSnapshot take it for writing. This is what
 	// lets queries against an existing snapshot run concurrently with the building of
 	// the next one.
+	// The experimental Typers project emitter holds a read lock for its entire
+	// request to prevent release from disposing resources during emission. Publishing
+	// new snapshot handles and releasing existing ones wait for that emission.
 	snapshots   map[SnapshotID]*snapshotData
 	snapshotsMu sync.RWMutex
 
@@ -672,6 +675,8 @@ func (s *Session) HandleRequest(ctx context.Context, method string, params json.
 		return s.handleTypeToString(ctx, parsed.(*TypeToTypeNodeParams))
 	case string(MethodPrintNode):
 		return s.handlePrintNode(ctx, parsed.(*PrintNodeParams))
+	case string(MethodTypersEmitProject):
+		return s.handleTypersEmitProject(ctx, parsed.(*GetProjectDiagnosticsParams))
 	case string(MethodIsContextSensitive):
 		return s.handleIsContextSensitive(ctx, parsed.(*GetContextualTypeParams))
 	case string(MethodGetReturnTypeOfSignature):

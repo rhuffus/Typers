@@ -28,6 +28,8 @@ El filtro pertenece al clon local. GitHub conserva el fork y su historial. No co
 
 H0 introduce `packages/compiler`, `packages/core`, `tooling/` y `examples/nestjs/`, separados del build legacy. La [guía de primeros pasos](getting-started.md) contiene los comandos efectivos. El nombre del módulo Go conserva el identificador upstream sin cambiar el destino de PRs ni la identidad del producto.
 
+El build de `packages/compiler` también compila el cliente API desde `tsc/_packages/native-preview` con el binario nativo recién construido. Requiere las dependencias fijadas de `tsc/`, copia su transporte vendorizado y no ejecuta generadores upstream. Si se modifica la API async, mantener la contraparte sync mediante el generador upstream y revisar el diff; ese generador utiliza la API TypeScript legacy como herramienta de desarrollo, sin formar parte del consumidor distribuido. Ver [ADR 0005](decisions/0005-native-api-and-project-emission.md).
+
 ## Entorno inicial
 
 El `go.mod` nativo exige Go 1.26 o posterior. El paquete nativo declara Node >=20.19; las herramientas concretas pueden elevar requisitos. Entorno observado al iniciar el trabajo: macOS arm64, Go 1.27.1, Node 24.20.0 y npm 11.19.0. Son datos de la máquina, no una matriz de plataformas soportadas.

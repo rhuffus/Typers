@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { copyFileSync, cpSync, existsSync, lstatSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { copyFileSync, cpSync, existsSync, lstatSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -21,6 +21,15 @@ const digest = (contents, algorithm = "sha256", encoding = "hex") =>
 
 function externalEntries(lock) {
   return Object.fromEntries(Object.entries(lock.packages).filter(([key]) => key !== "" && !localKeys.has(key)));
+}
+
+function filesUnder(directory) {
+  return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+    const fullPath = path.join(directory, entry.name);
+    if (entry.isDirectory()) return filesUnder(fullPath).map((file) => `${entry.name}/${file}`);
+    assert.ok(entry.isFile(), `Unexpected non-file in package artifact: ${fullPath}`);
+    return [entry.name];
+  }).sort();
 }
 
 function recreateOwnedConsumer() {
@@ -45,7 +54,7 @@ export function prepareConsumer() {
   assert.ok(lock.packages[""], "The fixture lockfile is missing its root package");
 
   recreateOwnedConsumer();
-  for (const file of ["tsconfig.json", "tsconfig.typers.json", "nest-cli.json", "src"]) {
+  for (const file of ["tsconfig.json", "tsconfig.typers.json", "nest-cli.json", "build-api.mjs", "src"]) {
     cpSync(path.join(seed, file), path.join(consumer, file), { recursive: true });
   }
   mkdirSync(path.join(consumer, "artifacts"));
@@ -97,7 +106,8 @@ export function prepareConsumer() {
   const verifiedFiles = {};
   const executable = process.platform === "win32" ? "typers.exe" : "typers";
   const packageFiles = {
-    compiler: ["package.json", "build-info.json", `native/${executable}`, "bin/typers.cjs", "lib/version.cjs", "lib/version.d.cts"],
+    compiler: ["package.json", "build-info.json", ...["native", "bin", "lib", "dist", "vendor"].flatMap((directory) =>
+      filesUnder(path.join(root, "packages/compiler", directory)).map((file) => `${directory}/${file}`))],
     core: ["package.json", "dist/esm/index.js", "dist/esm/index.d.ts", "dist/cjs/index.js", "dist/cjs/index.d.ts", "dist/cjs/package.json"],
   };
   for (const { dependency, directory } of localPackages) {
