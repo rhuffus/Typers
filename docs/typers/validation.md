@@ -26,6 +26,14 @@ Separar comandos de compilación CLI de `nest build`. El primero puede funcionar
 
 Desde ADR 0005 hay una tercera ruta: `build-api.mjs` en el ejemplo abre un proyecto nativo y utiliza `typersEmitProject`. Comparar todos sus archivos con el CLI y ejecutar sus módulos de forma independiente. No contar esta ruta como prueba de `nest build`.
 
+Desde ADR 0006, `tooling/test-nest-builder.mjs` verifica el adaptador instalado
+`typers-nest build`: selección raíz/proyecto, precedencias, assets y tipos públicos,
+comparación de todos los archivos con el CLI y ejecución de Nest estándar/if-let.
+Los fallos de configuración, compilación, colisiones y rutas deben conservar los
+outputs anteriores; `noEmit` también. Cubrir configuraciones heredadas mediante
+`extends` dentro de outDir para impedir que la limpieza destruya sus entradas.
+Los helpers tienen pruebas unitarias independientes en `packages/nest/test`.
+
 Las pruebas de API instalada deben importar las subrutas por el nombre de dependencia del consumidor, omitir `tsserverPath` y verificar los bytes instalados. Cubrir clientes sync/async, declaraciones, AST/tipos/diagnósticos, printer y emisión capturada. La petición de emisión no debe crear archivos: comprobar que solo los guarda el consumidor cuando acepta el resultado. También probar noEmit/noEmitOnError, errores globales/declaraciones, coherencia de snapshots y rechazo de incremental/composite/referencias.
 
 ## Comparación contra upstream

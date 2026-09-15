@@ -1,6 +1,6 @@
 # Primer prototipo: construir y probar
 
-Esta guía corresponde al prototipo experimental de CLI, runtime, if-let y API nativa. Se construye desde el código del fork; no necesita una publicación npm de Typers. La API clásica de Nest CLI sigue fuera de la cobertura disponible.
+Esta guía corresponde al prototipo experimental de CLI, runtime, if-let, API nativa y adaptador NestJS. Se construye desde el código del fork; no necesita una publicación npm de Typers. La API clásica de Nest CLI sigue fuera de la cobertura disponible.
 
 ## Requisitos y ubicación
 
@@ -12,7 +12,7 @@ npm --prefix tooling ci --ignore-scripts --no-audit --no-fund
 node tooling/compatibility.mjs
 ```
 
-La prueba construye el compilador y su cliente de API nativa, ejecuta las pruebas del runtime, crea tarballs y prepara un consumidor aislado con dependencias externas fijadas. Comprueba las once subrutas de API, compila la aplicación mediante CLI y API y ejecuta HTTP 200/404. Registra por separado el fallo conocido de la API clásica.
+La prueba construye el compilador y su cliente de API nativa, instala las dependencias fijadas del adaptador Nest, ejecuta las pruebas del runtime y del adaptador, crea tres tarballs y prepara un consumidor aislado con dependencias externas fijadas. Comprueba las once subrutas de API, compila la aplicación mediante CLI, API y adaptador, y ejecuta HTTP 200/404. Registra por separado el fallo conocido de la API clásica.
 
 El consumidor generado se encuentra en `built/typers/consumer`. Se comprueba el contenido instalado para evitar que un tarball o una caché antigua produzcan un falso positivo. El informe queda en `built/typers/compatibility.json`; los artefactos generados no se guardan en Git.
 
@@ -37,6 +37,28 @@ npm run build:api:typers
 ```
 
 Estos scripts invocan `project.typersEmitProject()` y guardan los resultados dentro de `outDir`. La operación de API captura los archivos en memoria; el script realiza las escrituras. No son `nest build` ni ejecutan sus plugins, assets o reescritura de aliases. Ver [API nativa](native-api.md).
+
+## Construir con configuración de Nest
+
+Desde el consumidor preparado:
+
+```sh
+npm run build:nest
+npm run build:nest:typers
+npx --no-install typers-nest build --json
+```
+
+Estos scripts usan el paquete local `@typers/nest` y leen `nest-cli.json`.
+El adaptador permite seleccionar `projects[nombre]`, sobrescribir el tsconfig,
+copiar assets y aplicar `deleteOutDir`. Resuelve el compilador instalado bajo
+`typescript` y comprueba que su identidad sea `@typers/compiler`.
+
+Se requieren `outDir` explícito y, al copiar assets, `rootDir` explícito en
+tsconfig. Los errores de compilación o validación previa y `noEmit` conservan
+la salida existente; los fallos de escritura no tienen rollback. El comando
+`typers-nest` tiene su propio contrato: los plugins, aliases, watch y otros
+builders generan un error claro. Consultar [comandos, API y configuración](../../packages/nest/README.md)
+y la [decisión de integración](decisions/0006-nest-build-adapter.md).
 
 ## Usar las APIs
 

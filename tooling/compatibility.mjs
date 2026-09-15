@@ -6,6 +6,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import path from "node:path";
 import { prepareConsumer } from "./prepare-consumer.mjs";
 import { testNativeApi } from "./test-native-api.mjs";
+import { testNestBuilder } from "./test-nest-builder.mjs";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const npm = process.platform === "win32" ? "npm.cmd" : "npm";
@@ -23,8 +24,11 @@ const expectSuccess = (res) => {
 rmSync(path.join(root, "built/typers/compatibility.json"), { force: true });
 run(process.execPath, ["tooling/build-compiler.mjs"]);
 run(npm, ["test"], path.join(root, "packages/core"));
+run(npm, ["ci", "--ignore-scripts", "--no-audit", "--no-fund"], path.join(root, "packages/nest"));
+run(npm, ["test"], path.join(root, "packages/nest"));
 run(npm, ["pack", "./packages/compiler", "--pack-destination", "./built/typers", "--quiet"]);
 run(npm, ["pack", "./packages/core", "--pack-destination", "./built/typers", "--quiet"]);
+run(npm, ["pack", "./packages/nest", "--pack-destination", "./built/typers", "--quiet"]);
 const preparation = prepareConsumer();
 const example = preparation.directory;
 const result = (command, args, cwd = example) => spawnSync(command, args, { cwd, encoding: "utf8", env });
@@ -118,6 +122,7 @@ expectSuccess(cli(upstreamBin, [
 ]));
 
 const nativeApi = await testNativeApi(example);
+const nestBuilder = await testNestBuilder(example);
 for (const [config, base, outDir, expected] of [
   ["tsconfig.api.json", "./tsconfig.json", "dist-api", "dist"],
   ["tsconfig.api-typers.json", "./tsconfig.typers.json", "dist-api-typers", "dist-typers"],
@@ -190,6 +195,7 @@ const report = {
   invalidTypes: "same TS2322 diagnostic and exit status",
   emittedDeclarations: "TypeScript 7.0.2 consumes declarations emitted from the if-let module",
   nativeApi,
+  nestBuilder,
   nativeApiEmission: "standard and if-let JS, declarations and maps identical to CLI; invalid build writes no files",
   nestRuntime: "standard and experimental modules from CLI and native API pass DI/metadata/HTTP tests",
   classicCompilerApi: { status: "known unsupported", missing },
@@ -197,5 +203,6 @@ const report = {
   oxcAndEditor: "not yet adapted or verified for if-let",
 };
 writeFileSync(path.join(root, "built/typers/compatibility.json"), JSON.stringify(report, null, 2) + "\n");
+console.log(`PASS: typers-nest adapter (${nestBuilder.counts.positiveGroups} positive groups, ${nestBuilder.counts.rejectedBuilds} rejected builds preserve outputs).`);
 console.log("PASS: native CLI/API, package alias, standard output, invalid types and NestJS runtime.");
 console.log("KNOWN UNSUPPORTED: Nest CLI compiler API; see built/typers/compatibility.json.");

@@ -6,7 +6,7 @@ El orden prioriza aprendizaje y reducción de riesgo. La complejidad incluye par
 
 Estado inicial de todos los hitos de código: **pendiente**. La documentación es la entrega previa. Los avances efectivos se registran en [estado](status.md).
 
-Avance posterior: H0 CLI, H1 y H2 tienen un prototipo verificado. H5 incorpora clientes nativos distribuidos y emisión programática, según [ADR 0005](decisions/0005-native-api-and-project-emission.md). La API clásica/Nest CLI y Oxc/editor siguen abiertos; no se considera H5 terminado por disponer de la API nueva.
+Avance posterior: H0 CLI, H1 y H2 tienen un prototipo verificado. H5 incorpora clientes nativos distribuidos y emisión programática, según [ADR 0005](decisions/0005-native-api-and-project-emission.md), y el adaptador `typers-nest build`, según [ADR 0006](decisions/0006-nest-build-adapter.md). La API clásica/Nest CLI y Oxc/editor siguen abiertos; no se considera H5 terminado por disponer de estas integraciones.
 
 ## H0 — Base reproducible y paquete de compilador
 
@@ -94,7 +94,15 @@ No implementarlo con reemplazos de texto ni con una IIFE que cambie el destino d
 
 No es necesario terminar toda esta superficie para experimentar; sí es necesario definirla antes de afirmar sustitución general o recomendar producción.
 
-La primera entrega de esta línea permite consultas sync/async y emisión de un proyecto a memoria, con el mismo núcleo que el CLI. No admite todavía build incremental ni referencias entre proyectos en esa operación. Próxima puerta: decisión e integración explícita para el build de Nest, incluyendo su configuración y transformadores, y definición del alcance de Oxc/editor. Ver [API nativa](native-api.md).
+La primera entrega de esta línea permite consultas sync/async y emisión de un proyecto a memoria, con el mismo núcleo que el CLI. No admite todavía build incremental ni referencias entre proyectos en esa operación. La segunda incorpora un adaptador explícito para Nest: configuración, selección de un proyecto, limpieza de salida y assets. Conserva rechazos claros para plugins y aliases; no proporciona el comando original de Nest CLI. Ver [API nativa](native-api.md) y [adaptador Nest](../../packages/nest/README.md).
+
+Siguiente orden recomendado dentro de H5:
+
+1. Definir y probar una transformación nativa de aliases sobre JS, declaraciones y mapas. Concretar resolución NodeNext/ESM antes de habilitar `paths` en el adaptador.
+2. Elegir un plugin Nest representativo y especificar la API de transformadores que necesita; medir el coste de una fachada clásica frente a una adaptación nativa.
+3. Integrar el flujo real Oxlint/Oxfmt y editor antes de ampliar el uso de if-let a los proyectos zhenix-ai.
+
+Estos pasos son investigación e implementación pendientes. No desbloquean por sí solos watch, proyectos referenciados o compatibilidad general con herramientas que importan la API clásica.
 
 ## H6 — Adaptadores de librerías
 

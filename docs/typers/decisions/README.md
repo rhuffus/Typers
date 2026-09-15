@@ -9,6 +9,7 @@ Un ADR registra contexto, decisión, consecuencias y criterios de revisión. No 
 | [0003 — Primer incremento](0003-first-increment.md) | Aceptado como orden de trabajo | Paquete, runtime, if-let |
 | [0004 — Runtime e if-let experimental](0004-experimental-runtime-and-if-let.md) | Aceptado para prototipo | Representación, activación y semántica limitada |
 | [0005 — API nativa y emisión](0005-native-api-and-project-emission.md) | Aceptado para prototipo | Distribución de clientes sync/async y emisión de proyectos en memoria |
+| [0006 — Adaptador de build NestJS](0006-nest-build-adapter.md) | Aceptado para prototipo | Comando explícito, configuración, assets y preservación de salidas |
 
 ## Decisiones futuras previstas
 

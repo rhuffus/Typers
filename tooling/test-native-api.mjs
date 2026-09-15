@@ -97,6 +97,7 @@ export async function testNativeApi(consumerDir) {
       assert.equal(existsSync(path.join(fixture, "emitted")), false);
       const emission = await project.typersEmitProject();
       assert.equal(emission.emitSkipped, false);
+      assert.deepEqual(emission.configFileNames, [configFile]);
       const filenames = emission.outputs.map((output) => output.fileName);
       assert.deepEqual(filenames, [...filenames].sort());
       for (const name of ["input.js", "input.d.ts", "input.js.map", "pattern.js", "pattern.d.ts"]) {
@@ -117,6 +118,7 @@ export async function testNativeApi(consumerDir) {
       const blockedEmission = await blockedProject.typersEmitProject();
       assert.equal(blockedEmission.emitSkipped, true);
       assert.deepEqual(blockedEmission.outputs, []);
+      assert.deepEqual(blockedEmission.configFileNames, [blockedConfig, configFile].sort());
       assert.ok(blockedEmission.diagnostics.some((diagnostic) => diagnostic.code === 2322));
       clients[mode] = {
         configuration: "parsed",
@@ -142,12 +144,13 @@ export async function testNativeApi(consumerDir) {
     'const syncProject = sync.updateSnapshot({ openProject: "tsconfig.json" }).getProject("tsconfig.json");',
     'const printed: string | undefined = syncProject?.emitter.printNode(node);',
     'const skipped: boolean | undefined = syncProject?.typersEmitProject().emitSkipped;',
+    'const configInputs: readonly string[] | undefined = syncProject?.typersEmitProject().configFileNames;',
     'declare const asynchronous: AsyncAPI;',
     'const config = await asynchronous.parseConfigFile("tsconfig.json");',
     'const files: readonly string[] = config.fileNames;',
     '// @ts-expect-error The native API does not pretend to expose the legacy facade.',
     'sync.createProgram([], {});',
-    'void [printed, files, skipped];',
+    'void [printed, files, skipped, configInputs];',
     '',
   ].join("\n"));
   const nativeCli = path.join(consumer, "node_modules/typescript/bin/typers.cjs");

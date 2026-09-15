@@ -69,3 +69,4 @@ package-lock.json
 !/tsc/internal/
 !/tooling/package-lock.json
 !/examples/nestjs/package-lock.json
+!/packages/nest/package-lock.json

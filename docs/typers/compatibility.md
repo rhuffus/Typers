@@ -4,6 +4,8 @@
 
 El [registro de estado](status.md) contiene la evidencia de ejecución actual. La [API nativa](native-api.md) documenta las subrutas ya distribuidas y la operación propia de emisión; la entrada raíz continúa sin proporcionar la API clásica.
 
+La integración implementada para Nest es el comando explícito [`typers-nest build`](../../packages/nest/README.md), con selección de proyecto, configuración y assets. Tiene pruebas propias y un alcance limitado. La sonda del comando original `nest build` sigue registrando la incompatibilidad con la API clásica; no se cuenta como superada por disponer del adaptador.
+
 ## 1. Qué significa «100 % compatible»
 
 **Aceptado como objetivo:** preservar TypeScript y añadir capacidades. **No demostrado:** compatibilidad universal con todas las versiones, paquetes y herramientas del ecosistema.

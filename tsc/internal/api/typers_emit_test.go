@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"errors"
+	"fmt"
 	"slices"
 	"strings"
 	"testing"
@@ -144,11 +145,76 @@ func TestTypersEmitProjectOptionsAndDiagnostics(t *testing.T) {
 			if test.outputSuffix != "" && emittedTypersText(result, test.outputSuffix) == "" {
 				t.Fatalf("missing %s output: %+v", test.outputSuffix, result.Outputs)
 			}
+			if !slices.Equal(result.ConfigFileNames, []string{"/project/tsconfig.json"}) {
+				t.Fatalf("selected config was not returned for %s: %v", test.name, result.ConfigFileNames)
+			}
 			if test.name == "declaration only" && len(result.Outputs) != 1 {
 				t.Fatalf("declaration-only emission included other outputs: %+v", result.Outputs)
 			}
 			if test.name == "global diagnostics" && !slices.ContainsFunc(result.Diagnostics, func(d *DiagnosticResponse) bool { return d.Code == 2318 }) {
 				t.Fatal("global diagnostics from the project checker pool were not returned")
+			}
+		})
+	}
+}
+
+func TestTypersEmitProjectConfigurationFiles(t *testing.T) {
+	t.Parallel()
+	for _, test := range []struct {
+		name       string
+		options    string
+		source     string
+		baseConfig string
+		skipped    bool
+		diagnostic bool
+	}{
+		{"emit", `"noEmitOnError":true`, `export const value = 1;`, `{}`, false, false},
+		{"noEmit", `"noEmit":true`, `export const value = 1;`, `{}`, true, false},
+		{"type error", `"noEmitOnError":true`, `export const value: string = 1;`, `{}`, true, true},
+		{"config error", `"noEmitOnError":true`, `export const value = 1;`, `{"compilerOptions":{"unknownTypersOption":true}}`, true, true},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			// The two parents share a transitive base, and one parent repeats in
+			// the array. All loaded configs must appear once, including a config
+			// inside outDir that a build adapter must protect from cleanup.
+			files := map[string]any{
+				"/project/tsconfig.json": fmt.Sprintf(`{
+					"extends":["./config/a.json","./config/b.json","./config/a.json"],
+					"compilerOptions":{"strict":true,"target":"es2022","module":"commonjs","lib":["es2022"],"types":[],"outDir":"dist",%s},
+					"files":["input.ts"]
+				}`, test.options),
+				"/project/config/a.json":          `{"extends":"../dist/base.json"}`,
+				"/project/config/b.json":          `{"extends":"../dist/./base.json"}`,
+				"/project/dist/base.json":         `{"extends":"../shared/foundation.json"}`,
+				"/project/shared/foundation.json": test.baseConfig,
+			}
+			session, params, utils := typersEmissionSession(t, test.options, test.source, files)
+			result, err := requestTypersEmit(t, session, params)
+			if err != nil {
+				t.Fatal(err)
+			}
+			want := []string{
+				"/project/config/a.json",
+				"/project/config/b.json",
+				"/project/dist/base.json",
+				"/project/shared/foundation.json",
+				"/project/tsconfig.json",
+			}
+			if !slices.Equal(result.ConfigFileNames, want) {
+				t.Fatalf("configuration chain: got %v, want %v", result.ConfigFileNames, want)
+			}
+			if result.EmitSkipped != test.skipped || (len(result.Diagnostics) != 0) != test.diagnostic {
+				t.Fatalf("unexpected skipped/diagnostics: %+v", result)
+			}
+			for _, output := range result.Outputs {
+				if utils.FS().FileExists(output.FileName) {
+					t.Fatalf("emitter wrote to filesystem: %s", output.FileName)
+				}
+			}
+			// Verify that the public wire name is present even for a skipped emit.
+			wire, err := json.Marshal(result)
+			if err != nil || !strings.Contains(string(wire), `"configFileNames"`) {
+				t.Fatalf("configuration metadata missing from response: %s (%v)", wire, err)
 			}
 		})
 	}

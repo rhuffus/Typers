@@ -9,6 +9,8 @@
     "build:typers": "tsc -p tsconfig.typers.json",
     "build:api": "node build-api.mjs",
     "build:api:typers": "node build-api.mjs tsconfig.typers.json",
+    "build:nest": "typers-nest build",
+    "build:nest:typers": "typers-nest build --path tsconfig.typers.json",
     "start": "node dist/main.js"
   },
   "dependencies": {
@@ -20,6 +22,7 @@
     "rxjs": "7.8.2"
   },
   "devDependencies": {
+    "@typers/nest": "file:../../built/typers/typers-nest-0.1.0-alpha.0.tgz",
     "@types/node": "24.13.4",
     "typescript": "file:../../built/typers/typers-compiler-7.0.2-typers.0.tgz"
   }
